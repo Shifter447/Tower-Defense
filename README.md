@@ -24,10 +24,10 @@ Spelers moeten **scrap** gebruiken omtorens te bouwen. Scrap can je krijgen door
   
 
 De schets bevat:  
-- Een zigzag-pad van startpunt (linksonder) naar de basis (rechtsboven).  
+- Een zigzag-pad van startpunt.  
 - Plaatsen naast het pad voor torens (vierkante bouwplaatsen).  
-- De basis (een energie-reactor).  
-- UI met: geld/energie, wave teller, levens, startknop, pauzeknop.  
+- De basis).  
+- UI met: Scrap, wave teller, levens, startknop, pauzeknop.  
 
 **Legenda:**  
 - 🔴 = vijanden  
