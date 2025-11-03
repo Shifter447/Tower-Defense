@@ -3,10 +3,13 @@ using UnityEngine;
 public class Missile : MonoBehaviour
 {
     public Transform target;
-    public float speed = 15f;       // horizontal speed
-    public float arcHeight = 5f;    // max height of the arc
+    public float speed = 15f;         // how fast it travels (affects travelTime)
+    public float arcHeight = 5f;      // peak of arc
     public float damage = 25f;
-    public float lifetime = 5f;
+    public float lifetime = 6f;
+
+    [Tooltip("Euler offset to match your model's forward axis (e.g. 0,180,0 if model faces -Z).")]
+    public Vector3 rotationEulerOffset = Vector3.zero;
 
     private Vector3 startPos;
     private Vector3 targetPos;
@@ -18,50 +21,78 @@ public class Missile : MonoBehaviour
     {
         target = newTarget;
         startPos = transform.position;
-        targetPos = target.position;
+
+        targetPos = (target != null) ? target.position : startPos + transform.forward * 10f;
         distance = Vector3.Distance(startPos, targetPos);
-        travelTime = distance / speed;
+        travelTime = Mathf.Max(0.001f, distance / Mathf.Max(0.0001f, speed));
         elapsed = 0f;
+
+        // initial facing toward target (plus offset)
+        Vector3 initialDir = (targetPos - startPos).normalized;
+        if (initialDir.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(initialDir) * Quaternion.Euler(rotationEulerOffset);
 
         Destroy(gameObject, lifetime);
     }
 
     void Update()
     {
-        if (target == null) return;
+        if (target == null)
+            return;
+
+        // keep updating target pos in case base moves
+        targetPos = target.position;
 
         elapsed += Time.deltaTime;
         float t = Mathf.Clamp01(elapsed / travelTime);
 
-        // Calculate horizontal position
-        Vector3 horizontalPos = Vector3.Lerp(startPos, targetPos, t);
+        // compute current and next positions along the arc
+        Vector3 currentPos = GetArcPosition(t);
+        float dt = Time.deltaTime / travelTime;
+        float nextT = Mathf.Clamp01(t + dt);
+        Vector3 nextPos = GetArcPosition(nextT);
 
-        // Vertical offset (parabola)
-        float heightOffset = 4f * arcHeight * t * (1 - t);
-        Vector3 nextPos = horizontalPos + Vector3.up * heightOffset;
+        // move first, then compute motion direction for rotation
+        transform.position = currentPos;
 
-        // Rotate missile to face direction of motion
-        Vector3 motionDir = nextPos - transform.position;
-        if (motionDir.sqrMagnitude > 0.001f)
-            transform.rotation = Quaternion.LookRotation(motionDir);
+        // tangent / motion direction
+        Vector3 motionDir = nextPos - currentPos;
 
-        // Move missile
-        transform.position = nextPos;
-
-        // Check if missile reached target
-        if (t >= 1f)
+        if (motionDir.sqrMagnitude > 0.000001f)
         {
-            HitTarget();
+            Quaternion desired = Quaternion.LookRotation(motionDir.normalized);
+            // apply model-local euler offset
+            desired *= Quaternion.Euler(rotationEulerOffset);
+
+            // smooth rotation to avoid jitter; you can increase LERP speed if needed
+            transform.rotation = Quaternion.Slerp(transform.rotation, desired, Mathf.Clamp01(20f * Time.deltaTime));
         }
+
+        if (t >= 1f)
+            HitTarget();
+    }
+
+    // Returns a point along the parabolic arc (linear XZ + vertical offset)
+    private Vector3 GetArcPosition(float t)
+    {
+        // linear interp between start and target
+        Vector3 linear = Vector3.Lerp(startPos, targetPos, t);
+
+        // vertical arc: sin(pi * t) is smooth and peaks at t=0.5
+        float height = arcHeight * Mathf.Sin(Mathf.PI * t);
+
+        // add vertical offset (note: if your target y differs, this blends start->target y)
+        // optional: use Mathf.Lerp(startPos.y, targetPos.y, t) + height if you want to respect target Y
+        Vector3 pos = new Vector3(linear.x, Mathf.Lerp(startPos.y, targetPos.y, t) + height, linear.z);
+        return pos;
     }
 
     private void HitTarget()
     {
         if (target != null)
         {
-            EnemyHealth enemy = target.GetComponent<EnemyHealth>();
-            if (enemy != null)
-                enemy.TakeDamage(damage);
+            BaseHealth b = target.GetComponent<BaseHealth>();
+            if (b != null) b.TakeDamage(damage);
         }
         Destroy(gameObject);
     }

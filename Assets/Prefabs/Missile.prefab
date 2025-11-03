@@ -5182,10 +5182,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  speed: 15
-  maxHeight: 5
+  speed: 5
+  arcHeight: 5
   damage: 25
   lifetime: 5
+  rotationEulerOffset: {x: 90, y: 90, z: 0}
 --- !u!4 &8864910949088385001 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e928c97154b911f4ebf7a75d34a4a49b, type: 3}
