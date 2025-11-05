@@ -3,19 +3,17 @@ using UnityEngine.UI;
 
 public class BaseHealth : MonoBehaviour
 {
-    [Header("Base Stats")]
-    public float maxHealth = 500f;
-    public float currentHealth;
+    [Header("Health Settings")]
+    public float maxHealth = 100f;
+    [HideInInspector] public float currentHealth;
 
-    [Header("UI (optional)")]
-    public Slider healthSlider;
-
-    [Header("Game Over Settings")]
-    public bool destroyOnDeath = false;
+    [Header("UI")]
+    public Slider healthSlider; // assign your Slider here
 
     void Start()
     {
         currentHealth = maxHealth;
+
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxHealth;
@@ -23,28 +21,25 @@ public class BaseHealth : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float amount)
     {
-        currentHealth -= damage;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        currentHealth -= amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+        UpdateUI();
 
+        if (currentHealth <= 0f)
+            Die();
+    }
+
+    void UpdateUI()
+    {
         if (healthSlider != null)
             healthSlider.value = currentHealth;
-
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
     }
 
     void Die()
     {
-        Debug.Log("💥 Base destroyed!");
-
-        if (destroyOnDeath)
-            Destroy(gameObject);
-
-        // TODO: You can trigger a GameOver screen or end condition here
-        // Example: GameManager.Instance.GameOver();
+        Debug.Log("Base destroyed!");
+        // Add game over logic here
     }
 }

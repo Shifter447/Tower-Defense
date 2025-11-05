@@ -7,52 +7,41 @@ public class HeavyEnemyMovement : MonoBehaviour
 {
     [Header("Path Settings")]
     public Transform[] waypoints;
-    public float speed = 4f;
+    public float speed = 3f;
     public float rotationSpeed = 5f;
 
     private int currentWaypoint = 0;
-    private float currentSpeed;
     private float baseY;
-    private Coroutine slowCoroutine;
+    private float currentSpeed;
 
     [Header("Attack Settings")]
-    public bool isRanged = true;
-    public float attackRange = 10f;
-    public float attackDamage = 15f;
-    public float attackRate = 1f;
-    public GameObject projectilePrefab;
-    public Transform[] firePoints; // multi-barrel
-    private int currentBarrel = 0;
+    public float attackRange = 8f;
+    public float attackDamage = 20f;
+    public float attackRate = 1.5f;
+    public GameObject projectilePrefab; // assign Projectile_Heavy here
+    public Transform[] firePoints; // assign 4 barrels in inspector
 
     private bool reachedBase = false;
     private bool isAttacking = false;
 
-    [HideInInspector] public BaseHealth baseHealth;
-    public Transform baseTransform => baseHealth != null ? baseHealth.transform : null; // ✅ read-only
-
+    private BaseHealth baseHealth;
     private EnemyHealth enemyHealth;
 
     void Start()
     {
         currentSpeed = speed;
         baseY = transform.position.y;
-
         enemyHealth = GetComponent<EnemyHealth>();
         baseHealth = FindFirstObjectByType<BaseHealth>();
 
-        // Ignore collisions with other enemies
+        // Ignore collisions between enemies
         Collider thisCollider = GetComponent<Collider>();
-        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject obj in allEnemies)
+        Collider[] allEnemies = FindObjectsByType<Collider>(FindObjectsSortMode.None);
+        foreach (Collider c in allEnemies)
         {
-            if (obj == this.gameObject) continue;
-            Collider otherCollider = obj.GetComponent<Collider>();
-            if (otherCollider != null)
-                Physics.IgnoreCollision(thisCollider, otherCollider);
+            if (c != thisCollider && c.CompareTag("Enemy"))
+                Physics.IgnoreCollision(thisCollider, c);
         }
-
-        if (waypoints == null || waypoints.Length == 0)
-            Debug.LogError($"{name} has no waypoints assigned!");
     }
 
     void Update()
@@ -110,43 +99,26 @@ public class HeavyEnemyMovement : MonoBehaviour
         while (enemyHealth != null && enemyHealth.currentHealth > 0 &&
                baseHealth != null && baseHealth.currentHealth > 0)
         {
-            if (isRanged && projectilePrefab != null && firePoints.Length > 0)
-            {
-                Transform firePoint = firePoints[currentBarrel];
-                GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-
-                Projectile projScript = proj.GetComponent<Projectile>();
-                if (projScript != null)
-                {
-                    projScript.SetTarget(baseHealth.transform);
-                    projScript.damage = attackDamage;
-                }
-
-                currentBarrel = (currentBarrel + 1) % firePoints.Length;
-            }
-            else
-            {
-                baseHealth.TakeDamage(attackDamage);
-            }
-
+            FireProjectiles();
             yield return new WaitForSeconds(1f / attackRate);
         }
 
         isAttacking = false;
     }
 
-    public void ApplySlow(float amount, float duration)
+    void FireProjectiles()
     {
-        if (slowCoroutine != null)
-            StopCoroutine(slowCoroutine);
-        slowCoroutine = StartCoroutine(SlowRoutine(amount, duration));
-    }
+        if (projectilePrefab == null || baseHealth == null) return;
 
-    private IEnumerator SlowRoutine(float amount, float duration)
-    {
-        currentSpeed = speed * (1f - amount);
-        yield return new WaitForSeconds(duration);
-        currentSpeed = speed;
-        slowCoroutine = null;
+        foreach (Transform firePoint in firePoints)
+        {
+            GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            Projectile_Heavy projScript = proj.GetComponent<Projectile_Heavy>();
+            if (projScript != null)
+            {
+                projScript.damage = attackDamage;
+                projScript.SetTarget(baseHealth.transform);
+            }
+        }
     }
 }

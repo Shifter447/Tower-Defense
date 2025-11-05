@@ -339,11 +339,12 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  speed: 3
-  rotationSpeed: 5
+  speed: 1
+  rotationSpeed: 3
   attackRange: 15
-  attackRate: 2
-  projectilePrefab: {fileID: 2944139591033345535, guid: 3648815aa36b7964dbce37f58ad06e7c, type: 3}
+  attackDamage: 5
+  attackRate: 1
+  projectilePrefab: {fileID: 4328671970575899868, guid: 4e2df49df097cf545b6f4826b2ef4405, type: 3}
   firePoints:
   - {fileID: 1918720043195990470}
   - {fileID: 3533955434195551976}

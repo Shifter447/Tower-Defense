@@ -88,7 +88,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fe9a23d0d44cda04691b9c7fe0a4e5a0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.28
+      value: 0.059
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fe9a23d0d44cda04691b9c7fe0a4e5a0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -260,10 +260,11 @@ MonoBehaviour:
   extraPlatformYawOffset: 0
   headPitchOffset: 0
   headYawOffset: 0
-  minPitch: -10
-  maxPitch: 60
+  minPitch: 0
+  maxPitch: 0
   firePoints:
   - {fileID: 4082725893763340326}
   - {fileID: 4376510357081493474}
   projectilePrefab: {fileID: 2944139591033345535, guid: 3648815aa36b7964dbce37f58ad06e7c, type: 3}
   fireRate: 5
+  headAxisYawOffset: 0
