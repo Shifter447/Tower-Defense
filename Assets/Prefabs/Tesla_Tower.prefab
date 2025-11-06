@@ -140,7 +140,7 @@ MonoBehaviour:
   range: 6
   maxTargets: 3
   damagePerSecond: 5
-  slowAmount: 0.5
+  slowAmount: 1
   slowDuration: 1
   lightningBeamPrefab: {fileID: 2518508383394687463, guid: 738f39f1ce138c74284a05f5bd6051f1, type: 3}
   beamWidth: 0.2

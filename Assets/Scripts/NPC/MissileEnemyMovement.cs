@@ -5,7 +5,6 @@ using System.Collections;
 [RequireComponent(typeof(EnemyHealth))]
 public class MissileEnemyMovement : MonoBehaviour
 {
-    [Header("Path Settings")]
     public Transform[] waypoints;
     public float speed = 3f;
     public float rotationSpeed = 5f;
@@ -18,10 +17,6 @@ public class MissileEnemyMovement : MonoBehaviour
     public Transform firePoint;
     public float attackRate = 1f;
     public float attackDamage = 10f;
-
-    [Header("Animation")]
-    public Animator animator;
-    public float shoulderAnimationDuration = 1f; // duration of default animation
 
     private bool reachedBase = false;
     private bool isAttacking = false;
@@ -68,18 +63,9 @@ public class MissileEnemyMovement : MonoBehaviour
             if (currentWaypoint >= waypoints.Length)
             {
                 reachedBase = true;
-                StartCoroutine(WaitAndStartAttacking());
+                StartCoroutine(AttackBase());
             }
         }
-    }
-
-    private IEnumerator WaitAndStartAttacking()
-    {
-        // Wait for the shoulder-opening animation to finish
-        yield return new WaitForSeconds(shoulderAnimationDuration);
-
-        // Start attacking
-        StartCoroutine(AttackBase());
     }
 
     private IEnumerator AttackBase()
@@ -91,23 +77,18 @@ public class MissileEnemyMovement : MonoBehaviour
         {
             if (missilePrefab != null && firePoint != null)
             {
-                ShootMissile();
+                GameObject missileGO = Instantiate(missilePrefab, firePoint.position, firePoint.rotation);
+                Missile missileScript = missileGO.GetComponent<Missile>();
+                if (missileScript != null)
+                {
+                    missileScript.SetTarget(baseHealth.transform);
+                    missileScript.damage = attackDamage;
+                }
             }
 
             yield return new WaitForSeconds(1f / attackRate);
         }
 
         isAttacking = false;
-    }
-
-    private void ShootMissile()
-    {
-        GameObject missileGO = Instantiate(missilePrefab, firePoint.position, Quaternion.identity);
-        Missile missileScript = missileGO.GetComponent<Missile>();
-        if (missileScript != null)
-        {
-            missileScript.SetTarget(baseHealth.transform);
-            missileScript.damage = attackDamage;
-        }
     }
 }
