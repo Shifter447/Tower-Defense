@@ -155,3 +155,9 @@ De schets bevat:
 - **Risico:** Te druk scherm.  
 - **Oplossing:** UI in een vaste balk onderin.  
 - **Acceptatie:** Alles blijft leesbaar tijdens gameplay.  
+
+
+# Gameplay
+
+
+![gif](Gameplay.gif)
