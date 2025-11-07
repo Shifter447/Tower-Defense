@@ -32,7 +32,7 @@ public class WaveSpawner : MonoBehaviour
 
     void Start()
     {
-        countdown = 3f;
+        countdown = 10f;
         UpdateUI();
     }
 
